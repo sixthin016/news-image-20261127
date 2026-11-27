@@ -8,18 +8,20 @@ One image that sums up Friday 27 November 2026's world news —
 35 stories, 10 regions, 15 fields — drawn as a classic serif
 newspaper front page, entirely in code (no photos).
 
-**The day in three leads:** Russia's overnight missile and drone
-barrage kills at least 3 in Ukraine · two Italian technicians
-killed as Iranian drones hit Kuwait · Macy's 100th Thanksgiving
-parade set for Saturday after the storm postponement.
+**The day in three leads:** a drone strike in Kuwait kills two
+Italian technicians · Black Friday opens with $12.9bn in US online
+sales forecast · Hamas weighs its reply after 10 die in Gaza.
 
-**Also inside:** the Houthis push on Aden · Trump and NATO's Rutte
-tell Russia not to escalate · Kim vows an 'uncontrollable' nuclear
-build-up · UK migration falls to a near 30-year low · Ebola in
-Congo passes 12,000 cases · world stocks slide as tariffs bite —
-plus 24 more stories, a world map with pins 1–11, a BY THE NUMBERS
-column, a timeline around the clock, and a red DATE CHECK box for
-stories that are *not* from 27 November.
+**Also inside:** Russia's overnight barrage kills at least 3 ·
+New Zealand's final count ends in deadlock, one seat short of a
+majority · a tanker capsizes off Ibiza with 7,000 tonnes of diesel
+aboard · Gukesh–Sindarov game 3 ends drawn · Depardieu to stand
+trial for rape · Amazon workers strike in 20 countries · Trump
+seeks a probe into 'fake' GDP · UK migration falls to a near
+30-year low — plus 24 more stories, a six-number strip, counted
+region and field bars, a UTC strip, a world map with pins 1–11, a
+BY THE NUMBERS column, and a red DATE CHECK box with a
+how-we-checked legend for stories that are *not* from 27 November.
 
 ## Run
 
@@ -38,7 +40,9 @@ python3 tools/generate.py   # writes assets/entry.png
 
 Every story is numbered 1–35 with a confidence badge
 (CONFIRMED / OFFICIAL / REPORTED / CLAIM) and a named source.
-Pictures and the map are drawn in code, not photographs.
+Every lead and every panel carries its own drawn scene and a
+WHY IT MATTERS line. Pictures and the map are drawn in code,
+not photographs.
 
 ---
 
