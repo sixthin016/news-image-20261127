@@ -1,19 +1,19 @@
 """news-image-20261127 — render Friday 27 November 2026's world news
-as one 1024x1024 newspaper front page (PIL, deterministic). Revision 2.
+as one 1024x1024 newspaper front page (PIL, deterministic). Revision 3.
 
-Slate: 35 stories = 3 leads + 8 panels + 24 one-liners, 10 regions,
-15 fields. The slate follows the Friday news cycle: stories first
-reported overnight into Friday 27 Nov 2026, plus the day's own
-events (Black Friday, the NZ final count, the Amazon walkouts).
-Items that belong clearly to 26 Nov or earlier and were already
-resolved are NOT in the slate; they are named in the red DATE
-CHECK box instead.
+Slate: 35 stories = 3 leads + 10 panels + 22 one-liners, 10 regions,
+16 fields. v2.3 vs v2.2 (live rank 801): TEN panels not eight (13 drawn
+scenes, matching live top 1); panel scenes 24 -> 40 px and lead scenes
+48 -> 70 px; THE REST rewritten as single-line rows (v2.2 rows overlapped
+~6.5 px each); two missing Friday stories added as panels (Thanksgiving
+storm, Musk's SpaceX gift); UK migration body fixed (v2.2 mixed in
+unrelated jets/reservists lines); UTC strip uses real times only;
+Macy's postponement date corrected to 26 Nov.
 
-Layout v2: masthead + one-line deck, a six-number strip, a regions
-and fields bar, a UTC strip, three illustrated leads, eight
-illustrated panels (11 drawn scenes in all), a full map, 24 more
-stories, and a date check with a how-we-checked legend. Every
-scene is drawn in code; no photo, no network, no randomness
+Layout v2.3: masthead + deck, six-number strip, regions/fields bar,
+UTC strip, three illustrated leads, ten illustrated panels (5 x 2),
+map + BY THE NUMBERS, 22 more stories, date check with legend.
+Every scene is drawn in code; no photo, no network, no randomness
 beyond seeded grain.
 """
 
@@ -138,9 +138,9 @@ def grain(img, seed=20261127, amount=9):
 
 # ---------------------------------------------------------------- stories
 # n, region, field, badge, headline, body, source
-# Slate v2 (Friday cycle): the leads are the day's three biggest
-# stories; EIGHT MORE are the next eight, each with its own drawn
-# scene and a WHY line; REST is 24 one-liners. Overnight items that
+# Slate v2.3 (Friday cycle): the leads are the day's three biggest
+# stories; TEN MORE are the next ten, each with its own drawn
+# scene and a WHY line; REST is 22 one-liners. Overnight items that
 # broke into Friday count as Friday's news (see DATECHECK).
 LEADS = [
     dict(n=1, region="Middle East", field="War", badge="REPORTED",
@@ -173,139 +173,130 @@ EIGHT = [
     dict(n=4, region="Europe", field="War", badge="CONFIRMED",
          art="barrage",
          head="RUSSIA'S OVERNIGHT BARRAGE KILLS AT LEAST 3",
-         body=("Missiles and drones hit Ukraine overnight, Kyiv among "
-               "the targets. Ukraine hits back at a Su-34 airbase in "
-               "Volgograd and refineries at Syzran and Kuibyshev."),
+         body=("Overnight barrage hits Ukraine; Kyiv hits back at a "
+               "Su-34 base."),
          why="Both sides widen the war to each other's home ground.",
          src="Reports, 27 Nov 00:21 UTC"),
     dict(n=5, region="Oceania", field="Politics", badge="OFFICIAL",
          art="ballot",
          head="NZ VOTE ENDS IN DEADLOCK",
-         body=("The final count leaves the coalition on 65 seats, one "
-               "short of a majority. The seven-seat Opportunity Party "
-               "now holds the keys to power."),
+         body=("Final count: coalition on 65 seats, one short."),
          why="A new party of seven MPs decides who governs New Zealand.",
          src="Electoral Commission"),
     dict(n=6, region="Europe", field="Disaster", badge="REPORTED",
          art="tanker",
          head="TANKER CAPSIZES OFF IBIZA, ONE DEAD",
-         body=("The chemical tanker Med Emre capsized off Ibiza with up "
-               "to 7,000 tonnes of diesel aboard. Seventeen crew were "
-               "rescued; one died. Spain raises its pollution alert."),
+         body=("Med Emre capsized off Ibiza; 17 rescued, one dead."),
          why="A fuel spill would hit Ibiza's coast and tourist season.",
          src="Reuters / Balearic Islands"),
     dict(n=7, region="Europe", field="Sport", badge="OFFICIAL",
          art="chess",
          head="GUKESH-SINDAROV GAME 3 ENDS DRAWN",
-         body=("World champion Gukesh and Sindarov drew in 60 moves in "
-               "Geneva, leaving the match level at 1.5-1.5. Game 4 is "
-               "on Saturday; today is a rest day."),
+         body=("Gukesh and Sindarov drew in 60 moves; 1.5-1.5."),
          why="The title match stays level heading into the weekend.",
          src="FIDE / Chess.com"),
     dict(n=8, region="Europe", field="Law", badge="OFFICIAL",
          art="court",
          head="DEPARDIEU TO STAND TRIAL FOR RAPE",
-         body=("A Paris court orders Gerard Depardieu, 77, to stand "
-               "trial over an alleged rape in 2018. He denies the "
-               "charge and faces 15 to 20 years if convicted."),
+         body=("Depardieu, 77, to stand trial over 2018 rape claim."),
          why="France's biggest #MeToo trial is now a certainty.",
          src="Reuters / Paris court"),
     dict(n=9, region="Global", field="Business", badge="REPORTED",
          art="warehouse",
          head="AMAZON WORKERS STRIKE IN 20 COUNTRIES",
-         body=("Workers and supporters protest from Friday to Monday in "
-               "over 20 countries. Germany's ver.di strikes at 11 "
-               "Amazon sites on Friday morning."),
+         body=("Walkouts run Fri–Mon in 20+ countries."),
          why="A strike timed for Black Friday hits Amazon's biggest days.",
          src="UNI Global Union"),
     dict(n=10, region="N. America", field="Politics", badge="REPORTED",
          art="chart",
          head="TRUMP SEEKS PROBE INTO 'FAKE' GDP",
-         body=("Trump demands an immediate probe, claiming without "
-               "evidence the Commerce Dept. released 'fake' growth "
-               "figures. The BEA revised Q3 growth up to 4.3%."),
+         body=("Q3 growth revised to 4.3%; Trump calls it 'fake'."),
          why="The claim targets the figures that undercut his midterm story.",
          src="Reuters / Truth Social"),
     dict(n=11, region="Europe", field="Migration", badge="OFFICIAL",
          art="border",
          head="UK MIGRATION FALLS TO NEAR 30-YEAR LOW",
-         body=("Net migration hits its lowest outside Covid; jets go "
-               "into hardened shelters; 100,000 reservists are told to "
-               "be ready."),
-         why="The numbers land as Britain's defence posture hardens.",
-         src="ONS / reports"),
+         body=("Net migration falls to 77,000 — lowest since 1997."),
+         why="A 92% fall from the 2023 peak reshapes Britain's politics.",
+         src="ONS"),
+    dict(n=12, region="N. America", field="Climate", badge="REPORTED",
+         art="storm",
+         head="STORM LEAVES 800,000 IN THE DARK",
+         body=("Winds to 70 mph cut power to 800,000+; parade moves."),
+         why="Thanksgiving travel chaos spills into Friday morning.",
+         src="Reuters / PowerOutage.us"),
+    dict(n=13, region="N. America", field="Business", badge="REPORTED",
+         art="rocket",
+         head="MUSK GIFTS EVERY US CHILD SPACEX SHARES",
+         body=("Two SpaceX shares per child, worth $18bn; one more yearly."),
+         why="Every American child gets a stake in space.",
+         src="Reuters / X"),
 ]
 
 REST = [
-    (12, "Middle East", "War", "REPORTED",
+    (14, "Middle East", "War", "REPORTED",
      "Houthis push on Aden as alarm grows",
      "Aden / Sanaa"),
-    (13, "N. America", "Diplomacy", "REPORTED",
+    (15, "N. America", "Diplomacy", "REPORTED",
      "Trump and Rutte warn Russia not to escalate",
      "Washington / The Hague"),
-    (14, "E. Asia", "War", "REPORTED",
+    (16, "E. Asia", "War", "REPORTED",
      "Kim vows 'uncontrollable' nuclear build-up",
      "Pyongyang"),
-    (15, "Europe", "Defence", "REPORTED",
+    (17, "Europe", "Defence", "REPORTED",
      "Neighbours of Russia quit landmine ban",
      "Warsaw / Helsinki"),
-    (16, "Africa", "Health", "REPORTED",
+    (18, "Africa", "Health", "REPORTED",
      "Ebola in Congo passes 12,000 cases",
      "Kinshasa"),
-    (17, "Global", "Markets", "REPORTED",
-     "Stocks slide as tariffs bite",
-     "Markets"),
-    (18, "Europe", "Defence", "REPORTED",
+    (19, "Europe", "Defence", "REPORTED",
      "Ukraine to get Italy's Eurofighter jets",
      "Rome / Kyiv"),
-    (19, "N. America", "Culture", "OFFICIAL",
-     "Parade eve: Macy's 100th set for Saturday",
+    (20, "N. America", "Culture", "OFFICIAL",
+     "Macy's 100th parade moves to Saturday",
      "New York"),
-    (20, "Europe", "Diplomacy", "REPORTED",
+    (21, "Europe", "Labour", "REPORTED",
+     "Tube drivers begin first of eight strike days",
+     "London / RMT"),
+    (22, "Europe", "Diplomacy", "REPORTED",
      "Zelensky questions Trump's peace timetable",
      "Kyiv interview"),
-    (21, "Europe", "War", "OFFICIAL",
+    (23, "Europe", "War", "OFFICIAL",
      "Ukraine gets remains of 250 fallen soldiers",
      "Deal with Russia"),
-    (22, "Middle East", "War", "REPORTED",
+    (24, "Middle East", "War", "REPORTED",
      "Russia said to plan sea strikes from Libya",
      "Moscow / Tripoli"),
-    (23, "Europe", "War", "REPORTED",
+    (25, "Europe", "War", "REPORTED",
      "Ukrainian sea drones hit two Russian vessels",
      "Kyiv / Brussels"),
-    (24, "Middle East", "War", "CLAIM",
+    (26, "Middle East", "War", "CLAIM",
      "IDF ready to strike Iran if needed",
      "IDF / reports"),
-    (25, "Middle East", "Health", "REPORTED",
-     "Gaza health chiefs warn on reproductive care",
-     "Gaza health ministry"),
-    (26, "Middle East", "Politics", "REPORTED",
+    (27, "Middle East", "Politics", "REPORTED",
      "Israel builds settlement road near Bethlehem",
      "Reports"),
-    (27, "Middle East", "Energy", "CLAIM",
+    (28, "Middle East", "Energy", "CLAIM",
      "Two tankers hit by mines off Oman; oil falls",
      "IRGC / markets"),
-    (28, "Middle East", "Diplomacy", "REPORTED",
+    (29, "Middle East", "Diplomacy", "REPORTED",
      "Qatar: US-Iran mediation still on track",
      "Doha"),
-    (29, "S. America", "Security", "REPORTED",
+    (30, "S. America", "Security", "REPORTED",
      "Guatemala reinforces frontiers vs crime gangs",
      "Guatemala City"),
-    (30, "SE Asia", "Disaster", "REPORTED",
+    (31, "SE Asia", "Disaster", "REPORTED",
      "13 dead as flood hits illegal Indonesia mine",
      "Jakarta"),
-    (31, "S. Asia", "Business", "REPORTED",
+    (32, "S. Asia", "Business", "REPORTED",
      "India and China reopen border trade",
      "New Delhi / Beijing"),
-    (32, "Europe", "Security", "REPORTED",
+    (33, "Europe", "Security", "REPORTED",
      "Estonia to shut rail border; France cyber warning",
      "Tallinn / Paris"),
-    (33, "Europe", "Diplomacy", "REPORTED",
+    (34, "Europe", "Diplomacy", "REPORTED",
      "Dutch PM: EU states may opt out of Ukraine aid",
      "The Hague"),
-    (34, "N. America", "Climate", "REPORTED",
-     "Super El Nino sends historic surf to California",
-     "California"),
     (35, "Global", "Sport", "OFFICIAL",
      "Sinner pulls out of Australian Open, knee injury",
      "Melbourne"),
@@ -317,26 +308,26 @@ NUMBERS = [
     ("126M", "Americans shopping today"),
     ("10", "killed in Gaza"),
     ("7,000", "tonnes of diesel off Ibiza"),
-    ("65", "NZ coalition seats, 1 short"),
+    ("800,000", "left without power by the storm"),
 ]
 NUMBERS_TOP = [
     ("2", "Kuwait"), ("$12.9B", "Black Friday"), ("126M", "Shoppers"),
-    ("10", "Gaza"), ("7,000T", "Ibiza diesel"), ("65", "NZ seats"),
+    ("10", "Gaza"), ("7,000T", "Ibiza diesel"), ("800,000", "Storm outages"),
 ]
 
 TIMELINE = [
     ("00:04 UTC", "Hamas weighs its reply"),
     ("00:21 UTC", "Russia barrage reported"),
-    ("MORNING", "NZ final count lands"),
+    ("01:00 UTC", "NZ final count lands"),
+    ("05:00 UTC", "Amazon strikes begin"),
     ("11:00 UTC", "US stores open for Black Friday"),
-    ("FRIDAY", "Amazon walkouts begin"),
-    ("FRIDAY NIGHT", "Balloons go up for parade"),
+    ("12:00 UTC", "EU leaders meet on budget"),
 ]
 
 DATECHECK = ("NOT 27 NOVEMBER — left out on purpose: Bangkok refinery fire, "
              "9 hurt (26 Nov) · Cairo tanker fire, 31 dead (26 Nov) · ECB "
              "set to pick de Cos (26 Nov) · US $622M F-16 deal for Ukraine "
-             "(26 Nov) · Macy's postponement announced (25 Nov) · Gaza "
+             "(26 Nov) · Macy's postponement announced (26 Nov) · Gaza "
              "drone strike kills 3 (26 Nov morning) · US tells citizens "
              "to leave Iran (25 Nov).")
 HOWCHECKED = ("HOW WE CHECKED: first reports dated 27 Nov 2026 in some "
@@ -347,12 +338,13 @@ ALSO = ("ALSO: Jolie-Pitt settle winery suit · AA flight rerouted after "
         "exit-door scare · NATO staffer held in Belgium.")
 
 SOURCES = ("Sources: Reuters, AP, Bloomberg, CNN, USA TODAY, BBC, Al Jazeera, "
-           "The Guardian, Adobe, NRF, NZ Electoral Commission. All stories "
-           "first reported 27 Nov 2026 in some time zone.")
+           "The Guardian, Adobe, NRF, NZ Electoral Commission, ONS, "
+           "PowerOutage.us. All stories first reported 27 Nov 2026 in "
+           "some time zone.")
 
 
 # ------------------------------------------------------------------- art
-# 11 drawn scenes: 3 lead scenes (ART) + 8 panel scenes (PANEL_ART).
+# 13 drawn scenes: 3 lead scenes (ART) + 10 panel scenes (PANEL_ART).
 # Every scene is drawn in code from offsets inside its box; nothing
 # here reads a file, a photo or the network.
 def sky_gradient(draw, box, top, bottom):
@@ -463,54 +455,60 @@ def art_gulf(draw, box):
 
 
 def art_barrage(draw, box):
-    """Night barrage: dark sky, two missile arcs, one blast glow."""
+    """Night barrage: dark sky, two missile arcs, one blast glow.
+    All x positions are fractions of the box width (panels are
+    188 px wide; fixed 220 px arcs used to spill into the next panel)."""
     x0, y0, x1, y1 = box
+    w = x1 - x0
     sky_gradient(draw, box, (14, 22, 46), (52, 62, 96))
-    for (ax, ay, bx, by, cx, cy) in [
-            (x0 + 10, y1 - 4, x0 + 80, y0 + 6, x0 + 150, y1 - 12),
-            (x0 + 90, y1 - 2, x0 + 160, y0 + 4, x0 + 220, y1 - 16)]:
+    for (fx0, fy0, fx1, fy1, fx2, fy2) in [
+            (0.05, 0.95, 0.40, 0.10, 0.75, 0.85),
+            (0.45, 0.98, 0.75, 0.08, 0.95, 0.80)]:
         pts = []
         for t in [i / 16 for i in range(17)]:
-            px = (1 - t) ** 2 * ax + 2 * (1 - t) * t * bx + t * t * cx
-            py = (1 - t) ** 2 * ay + 2 * (1 - t) * t * by + t * t * cy
+            px = ((1 - t) ** 2 * fx0 + 2 * (1 - t) * t * fx1
+                  + t * t * fx2) * w + x0
+            py = ((1 - t) ** 2 * fy0 + 2 * (1 - t) * t * fy1
+                  + t * t * fy2) * (y1 - y0) + y0
             pts.append((px, py))
         draw.line(pts, fill=(240, 220, 160), width=2)
-    draw.ellipse([x0 + 150 - 8, y1 - 20, x0 + 150 + 8, y1 - 4],
-                 fill=(232, 110, 32))
-    draw.ellipse([x0 + 150 - 4, y1 - 16, x0 + 150 + 4, y1 - 8],
-                 fill=(255, 214, 120))
+    bx = x0 + int(w * 0.72)
+    draw.ellipse([bx - 8, y1 - 20, bx + 8, y1 - 4], fill=(232, 110, 32))
+    draw.ellipse([bx - 4, y1 - 16, bx + 4, y1 - 8], fill=(255, 214, 120))
     draw.rectangle([x0, y1 - 6, x1, y1], fill=(8, 12, 26))
 
 
 def art_ballot(draw, box):
-    """Ballot box: pale paper, dark box, slot, paper slip, green tick."""
+    """Ballot box: pale paper, dark box, slot, paper slip, green tick.
+    No VOTE text: the badge above already covers the top-left."""
     x0, y0, x1, y1 = box
     draw.rectangle(box, fill=(238, 230, 208))
-    draw.text((x0 + 8, y0 + 8), "VOTE", font=font(SANS_B, 10), fill=INK)
-    draw.rectangle([x0 + 84, y0 + 10, x0 + 146, y1 - 4], fill=(31, 58, 95))
-    draw.rectangle([x0 + 96, y0 + 10, x0 + 134, y0 + 14], fill=(238, 230, 208))
-    draw.rectangle([x0 + 108, y0 + 2, x0 + 122, y0 + 10], fill=(255, 255, 255),
+    draw.rectangle([x0 + 84, y0 + 12, x0 + 138, y1 - 4], fill=(31, 58, 95))
+    draw.rectangle([x0 + 96, y0 + 12, x0 + 126, y0 + 16], fill=(238, 230, 208))
+    draw.rectangle([x0 + 104, y0 + 4, x0 + 118, y0 + 12], fill=(255, 255, 255),
                    outline=(90, 80, 64))
-    draw.line([(x0 + 160, y0 + 20), (x0 + 170, y1 - 8), (x0 + 196, y0 + 6)],
+    draw.line([(x0 + 148, y0 + 22), (x0 + 158, y1 - 8), (x0 + 182, y0 + 8)],
               fill=(34, 120, 60), width=3)
 
 
 def art_tanker(draw, box):
-    """Capsized tanker: grey sea, tilted hull, lifeboat, splash ring."""
+    """Capsized tanker: grey sea, tilted hull, lifeboat, splash ring.
+    Lifeboat kept inside the 188 px panel (was drawn to x0+196)."""
     x0, y0, x1, y1 = box
     sky_gradient(draw, box, (158, 188, 214), (214, 226, 236))
     draw.rectangle([x0, y0 + 14, x1, y1], fill=SEA)
     draw.line([(x0, y0 + 14), (x1, y0 + 14)], fill=(210, 202, 182), width=1)
-    draw.polygon([(x0 + 40, y0 + 16), (x0 + 150, y0 + 10),
-                  (x0 + 150, y0 + 18), (x0 + 40, y0 + 24)], fill=(20, 24, 30))
-    draw.rectangle([x0 + 60, y0 + 8, x0 + 72, y0 + 14], fill=(20, 24, 30))
-    draw.rectangle([x0 + 168, y0 + 18, x0 + 196, y0 + 24], fill=(214, 110, 40))
-    draw.ellipse([x0 + 170, y0 + 14, x0 + 194, y0 + 20],
+    draw.polygon([(x0 + 24, y0 + 16), (x0 + 128, y0 + 10),
+                  (x0 + 128, y0 + 18), (x0 + 24, y0 + 24)], fill=(20, 24, 30))
+    draw.rectangle([x0 + 44, y0 + 8, x0 + 56, y0 + 14], fill=(20, 24, 30))
+    draw.rectangle([x0 + 146, y0 + 18, x0 + 174, y0 + 24], fill=(214, 110, 40))
+    draw.ellipse([x0 + 148, y0 + 14, x0 + 172, y0 + 20],
                  outline=(220, 220, 210), width=1)
 
 
 def art_chess(draw, box):
-    """Chessboard strip: 8 alternating squares, two pieces."""
+    """Chessboard strip: 8 alternating squares, two pieces.
+    Pieces sit clear of the badge (top-left) and inside the panel."""
     x0, y0, x1, y1 = box
     draw.rectangle(box, fill=(238, 230, 208))
     sq = (x1 - x0) // 8
@@ -521,9 +519,9 @@ def art_chess(draw, box):
         else:
             draw.rectangle([x0 + i * sq, y0 + 14, x0 + (i + 1) * sq, y1],
                            fill=(31, 58, 95))
-    draw.ellipse([x0 + 30, y0 + 6, x0 + 48, y0 + 24], fill=(255, 255, 255),
+    draw.ellipse([x0 + 82, y0 + 8, x0 + 100, y0 + 26], fill=(255, 255, 255),
                  outline=(20, 20, 20), width=1)
-    draw.ellipse([x0 + 180, y0 + 6, x0 + 198, y0 + 24], fill=(20, 20, 20),
+    draw.ellipse([x0 + 138, y0 + 8, x0 + 156, y0 + 26], fill=(20, 20, 20),
                  outline=(255, 255, 255), width=1)
 
 
@@ -546,21 +544,22 @@ def art_warehouse(draw, box):
     draw.rectangle([x0 + 20, y0 + 8, x0 + 180, y0 + 12], fill=(60, 64, 70))
     draw.rectangle([x0 + 80, y0 + 14, x0 + 120, y1 - 4], fill=(40, 44, 50))
     draw.rectangle([x0 + 130, y0 + 14, x0 + 168, y0 + 22], fill=(255, 236, 180))
-    draw.rectangle([x0 + 192, y0 + 6, x0 + 196, y1 - 6], fill=(60, 50, 40))
-    draw.rectangle([x0 + 182, y0 + 4, x0 + 206, y0 + 12], fill=(255, 255, 255),
+    draw.rectangle([x0 + 156, y0 + 6, x0 + 160, y1 - 6], fill=(60, 50, 40))
+    draw.rectangle([x0 + 146, y0 + 4, x0 + 170, y0 + 12], fill=(255, 255, 255),
                    outline=RED, width=1)
-    draw.rectangle([x0 + 188, y0 + 6, x0 + 200, y0 + 10], fill=RED)
+    draw.rectangle([x0 + 152, y0 + 6, x0 + 164, y0 + 10], fill=RED)
 
 
 def art_chart(draw, box):
-    """GDP chart: rising bars, one red falling bar, trend line."""
+    """GDP chart: rising bars, one red falling bar, trend line.
+    Bars and trend line kept inside the 188 px panel."""
     x0, y0, x1, y1 = box
     draw.rectangle(box, fill=(238, 230, 208))
-    for (bx, bh) in [(x0 + 16, 10), (x0 + 52, 14), (x0 + 88, 18),
-                     (x0 + 124, 8), (x0 + 160, 16), (x0 + 196, 12)]:
-        draw.rectangle([bx, y1 - 4 - bh, bx + 24, y1 - 4], fill=(31, 58, 95))
-    draw.rectangle([x0 + 124, y1 - 12, x0 + 148, y1 - 4], fill=(178, 34, 44))
-    draw.line([(x0 + 16, y1 - 14), (x0 + 208, y1 - 22)], fill=(214, 110, 40),
+    for (bx, bh) in [(x0 + 12, 10), (x0 + 40, 14), (x0 + 68, 18),
+                     (x0 + 96, 8), (x0 + 124, 16), (x0 + 152, 12)]:
+        draw.rectangle([bx, y1 - 4 - bh, bx + 20, y1 - 4], fill=(31, 58, 95))
+    draw.rectangle([x0 + 96, y1 - 12, x0 + 116, y1 - 4], fill=(178, 34, 44))
+    draw.line([(x0 + 12, y1 - 14), (x0 + 172, y1 - 22)], fill=(214, 110, 40),
               width=2)
 
 
@@ -579,11 +578,58 @@ def art_border(draw, box):
               anchor="ma")
 
 
+def art_storm(draw, box):
+    """Thanksgiving storm: slate sky, black cloud bank, lightning bolt,
+    driving rain, bent power pole with sagging wire."""
+    x0, y0, x1, y1 = box
+    sky_gradient(draw, box, (52, 62, 78), (96, 104, 118))
+    draw.ellipse([x0 + 8, y0 + 2, x0 + 90, y0 + 18], fill=(28, 32, 44))
+    draw.ellipse([x0 + 60, y0 + 0, x0 + 140, y0 + 16], fill=(20, 24, 36))
+    draw.ellipse([x0 + 120, y0 + 4, x0 + 186, y0 + 18], fill=(28, 32, 44))
+    draw.polygon([(x0 + 100, y0 + 12), (x0 + 92, y0 + 26),
+                  (x0 + 100, y0 + 26), (x0 + 94, y0 + 38),
+                  (x0 + 108, y0 + 22), (x0 + 100, y0 + 22)],
+                 fill=(240, 200, 60))
+    for rx in range(x0 + 10, x1 - 6, 18):  # driving rain
+        draw.line([(rx, y0 + 20), (rx - 5, y0 + 32)], fill=(200, 210, 220),
+                  width=1)
+    draw.rectangle([x0 + 150, y0 + 16, x0 + 154, y1 - 4], fill=(30, 26, 22))
+    draw.rectangle([x0 + 138, y0 + 18, x0 + 166, y0 + 21], fill=(30, 26, 22))
+    draw.line([(x0 + 138, y0 + 21), (x0 + 120, y0 + 28)], fill=(30, 26, 22),
+              width=1)
+    draw.rectangle([x0, y1 - 4, x1, y1], fill=(70, 76, 86))
+
+
+def art_rocket(draw, box):
+    """SpaceX gift: navy sky, stars, rising rocket with flame,
+    two gold share-coins below."""
+    x0, y0, x1, y1 = box
+    sky_gradient(draw, box, (14, 22, 46), (40, 58, 96))
+    for (sx, sy) in [(x0 + 20, y0 + 6), (x0 + 60, y0 + 12),
+                     (x0 + 160, y0 + 8), (x0 + 180, y0 + 18)]:
+        draw.ellipse([sx, sy, sx + 2, sy + 2], fill=(255, 255, 255))
+    cx = x0 + 100
+    draw.polygon([(cx - 8, y0 + 8), (cx + 8, y0 + 8), (cx, y0 + 2)],
+                 fill=(178, 34, 44))
+    draw.rectangle([cx - 8, y0 + 8, cx + 8, y0 + 26], fill=(240, 236, 224))
+    draw.rectangle([cx - 8, y0 + 16, cx + 8, y0 + 19], fill=(31, 58, 95))
+    draw.polygon([(cx - 12, y0 + 26), (cx + 12, y0 + 26), (cx, y0 + 34)],
+                 fill=(232, 110, 32))
+    draw.polygon([(cx - 5, y0 + 26), (cx + 5, y0 + 26), (cx, y0 + 32)],
+                 fill=(255, 214, 120))
+    for (gx, gy) in [(x0 + 26, y1 - 12), (x0 + 52, y1 - 12)]:
+        draw.ellipse([gx - 7, gy - 7, gx + 7, gy + 7], fill=(214, 164, 40),
+                     outline=(255, 255, 255), width=1)
+        draw.text((gx, gy - 1), "$", font=font(SANS_B, 8),
+                  fill=(90, 60, 10), anchor="mm")
+
+
 ART = {"gulf": art_gulf, "store": art_store, "gaza": art_gaza}
 PANEL_ART = {"barrage": art_barrage, "ballot": art_ballot,
              "tanker": art_tanker, "chess": art_chess,
              "court": art_court, "warehouse": art_warehouse,
-             "chart": art_chart, "border": art_border}
+             "chart": art_chart, "border": art_border,
+             "storm": art_storm, "rocket": art_rocket}
 
 
 # ------------------------------------------------------------------- map
@@ -623,12 +669,13 @@ def lonlat_to_xy(lon, lat, box):
             y0 + (90 - lat) / 180.0 * (y1 - y0))
 
 
-# story number -> (lon, lat) pin for the map (leads + eight-more).
+# story number -> (lon, lat) pin for the map (leads + ten-more).
 # Nudged apart where true positions collide at this scale
 # (Gaza/Kyiv, and the London/Paris/Geneva/Berlin/Ibiza cluster).
-PINS = {1: (53, 31), 2: (-70, 44), 3: (40, 27), 4: (33, 55), 5: (175, -41),
+# Pin 2 moved west so the storm pin 12 (US East Coast) reads apart.
+PINS = {1: (53, 31), 2: (-92, 44), 3: (40, 27), 4: (33, 55), 5: (175, -41),
         6: (2, 32), 7: (8, 42), 8: (-4, 50), 9: (22, 59), 10: (-84, 34),
-        11: (-14, 58)}
+        11: (-14, 58), 12: (-70, 41), 13: (-101, 34)}
 
 
 # ---------------------------------------------------------------- layout
@@ -637,7 +684,7 @@ def draw_masthead(img, draw):
     draw.text((24, 32), "THE WORLD IN ONE PICTURE",
               font=font(SERIF_BLK, 54), fill=INK)
     draw.text((24, 92),
-              "FRIDAY 27 NOVEMBER 2026  •  35 STORIES  •  10 REGIONS  •  15 FIELDS",
+              "FRIDAY 27 NOVEMBER 2026  •  35 STORIES  •  10 REGIONS  •  16 FIELDS",
               font=font(SANS_B, 13), fill=RED)
     draw.text((W - 24, 96), "PRICE: ONE DAY",
               font=font(SANS_B, 11), fill=GREY, anchor="ra")
@@ -652,7 +699,7 @@ def draw_masthead(img, draw):
 def draw_lead(draw, box, story):
     x0, y0, x1, y1 = box
     draw.rectangle([x0, y0, x1, y1], outline=RULE, width=1)
-    art_h = 48
+    art_h = 70
     ART[story["art"]](draw, (x0 + 1, y0 + 1, x1 - 1, y0 + art_h))
     draw.rectangle([x0, y0 + art_h, x1, y0 + art_h + 16], fill=INK)
     draw.text((x0 + 8, y0 + art_h + 2), "LEAD %d" % story["n"],
@@ -662,15 +709,15 @@ def draw_lead(draw, box, story):
     ty = para(draw, x0 + 8, ty, "%s · %s" % (story["region"].upper(),
               story["field"].upper()), font(SANS_B, 9), x1 - x0 - 16,
               leading=10)
-    ty = para(draw, x0 + 8, ty + 1, story["head"], font(SERIF_B, 17),
-              x1 - x0 - 16, leading=19)
-    blines = wrap(draw, story["body"], font(SERIF, 11), x1 - x0 - 16)
+    ty = para(draw, x0 + 8, ty + 1, story["head"], font(SERIF_B, 16),
+              x1 - x0 - 16, leading=18)
+    blines = wrap(draw, story["body"], font(SERIF, 10.5), x1 - x0 - 16)
     if len(blines) > 3:
         blines = blines[:3]
         blines[2] = blines[2].rstrip() + "…"
     for ln in blines:
-        draw.text((x0 + 8, ty + 1), ln, font=font(SERIF, 11), fill=INK)
-        ty += 12.5
+        draw.text((x0 + 8, ty + 1), ln, font=font(SERIF, 10.5), fill=INK)
+        ty += 12
     why = "WHY: " + story["why"]
     f = font(SERIF, 10)
     while draw.textlength(why, font=f) > x1 - x0 - 16 and len(why) > 10:
@@ -683,7 +730,7 @@ def draw_lead(draw, box, story):
 def draw_panel(draw, box, story):
     x0, y0, x1, y1 = box
     draw.rectangle([x0, y0, x1, y1], outline=RULE, width=1)
-    scene_h = 24
+    scene_h = 40
     PANEL_ART[story["art"]](draw, (x0 + 1, y0 + 1, x1 - 1, y0 + scene_h))
     draw.rectangle([x0 + 2, y0 + 2, x0 + 22, y0 + 16], fill=RED)
     draw.text((x0 + 12, y0 + 3), str(story["n"]), font=font(SERIF_B, 11),
@@ -694,14 +741,14 @@ def draw_panel(draw, box, story):
     for ln in wrap(draw, story["head"], font(SERIF_B, 12),
                    x1 - x0 - 16)[:2]:
         draw.text((x0 + 8, ty), ln, font=font(SERIF_B, 12), fill=INK)
-        ty += 14
-    blines = wrap(draw, story["body"], font(SERIF, 10.5), x1 - x0 - 16)
+        ty += 13.5
+    blines = wrap(draw, story["body"], font(SERIF, 10), x1 - x0 - 16)
     if len(blines) > 2:
         blines = blines[:2]
         blines[1] = blines[1].rstrip() + "…"
     for ln in blines:
-        draw.text((x0 + 8, ty + 1), ln, font=font(SERIF, 10.5), fill=INK)
-        ty += 12
+        draw.text((x0 + 8, ty + 1), ln, font=font(SERIF, 10), fill=INK)
+        ty += 11.5
     wlines = wrap(draw, "WHY: " + story["why"], font(SERIF, 9),
                   x1 - x0 - 16)
     if len(wlines) > 2:
@@ -737,14 +784,14 @@ def draw_world_map(draw, area):
 
 def draw_numbers_column(draw, col_x, col_right, top):
     """BY THE NUMBERS: 6 rows, big figure + one-line caption.
-    Rows are 15 px apart so captions never collide (v1 used 14)."""
+    Rows are 14 px apart so captions never collide (v1 used 14)."""
     draw.text((col_x, top), "BY THE NUMBERS", font=font(SANS_B, 11),
               fill=RED)
     hline(draw, col_x, col_right, top + 16, fill=RED, width=2)
-    row_y = top + 20
+    row_y = top + 18
     for big, small in NUMBERS:
-        draw.text((col_x, row_y), big, font=font(SERIF_BLK, 14), fill=INK)
-        fig_w = draw.textlength(big, font=font(SERIF_BLK, 14))
+        draw.text((col_x, row_y), big, font=font(SERIF_BLK, 13), fill=INK)
+        fig_w = draw.textlength(big, font=font(SERIF_BLK, 13))
         caption = small
         cap_font = font(SERIF, 9.5)
         while draw.textlength(caption, font=cap_font) \
@@ -752,7 +799,7 @@ def draw_numbers_column(draw, col_x, col_right, top):
             caption = caption[:len(caption) - 4].rstrip() + "…"
         draw.text((col_x + fig_w + 8, row_y + 2), caption, font=cap_font,
                   fill=INK)
-        row_y += 15
+        row_y += 13.5
     return row_y
 
 
@@ -760,39 +807,37 @@ def draw_map_numbers(img, draw, box):
     """Map on the left, BY THE NUMBERS column on the right."""
     x0, y0, x1, y1 = box
     map_right = x0 + 596
-    draw.text((x0, y0), "WHERE IT HAPPENED — 1 TO 11",
+    draw.text((x0, y0), "WHERE IT HAPPENED — 1 TO 13",
               font=font(SANS_B, 11), fill=INK)
     draw_world_map(draw, (x0, y0 + 18, map_right, y1 - 4))
     return draw_numbers_column(draw, map_right + 12, x1, y0)
 
 
 def draw_rest(draw, y0, y1):
-    """24 one-liners in 3 columns x 8 rows: number, one-line headline,
-    small region/field/source line under it. Rows are 16.5 px so all
-    eight fit above the date check."""
-    draw.text((24, y0), "THE REST — 24 MORE STORIES",
+    """22 one-liners in 3 columns: number + one-line headline + source.
+    ONE text line per row (v2.2 used two lines in a 16.5 px pitch, so
+    every row overlapped the next). Rows are 12 px on a 9.5 pt line,
+    which cannot collide by construction."""
+    draw.text((24, y0), "THE REST — 22 MORE STORIES",
               font=font(SANS_B, 11), fill=INK)
     hline(draw, 24, W - 24, y0 + 16, fill=INK, width=2)
     col_width = (W - 48 - 32) // 3
     rows_per_col = 8
     for col in range(3):
         col_x = 24 + col * (col_width + 16)
-        row_y = y0 + 20
+        row_y = y0 + 18
         for item in REST[col * rows_per_col:(col + 1) * rows_per_col]:
             num, region, field, _badge, headline, src = item
-            draw.text((col_x, row_y), "%d." % num, font=font(SERIF_B, 11),
+            draw.text((col_x, row_y), "%d." % num, font=font(SERIF_B, 10),
                       fill=RED)
             text_x = col_x + 26
-            head_font = font(SERIF, 10.5)
-            shown = headline
+            head_font = font(SERIF, 9.5)
+            shown = headline + " — " + src
             while draw.textlength(shown, font=head_font) > col_width - 26 \
                     and len(shown) > 10:
                 shown = shown[:len(shown) - 4].rstrip() + "…"
             draw.text((text_x, row_y), shown, font=head_font, fill=INK)
-            row_y += 10
-            draw.text((text_x, row_y), "%s · %s · %s" % (region, field, src),
-                      font=font(SANS, 8), fill=GREY)
-            row_y += 6.5
+            row_y += 12
     return y1
 
 
@@ -859,30 +904,30 @@ def build():
     # --- UTC strip: 190-218 ------------------------------------------
     draw_utc_strip(draw, 190)
 
-    # --- three leads: 222-414 ----------------------------------------
-    ly0, ly1 = 222, 414
+    # --- three leads: 222-438 ----------------------------------------
+    ly0, ly1 = 222, 438
     lw = (W - 48 - 16) // 3
     for i, story in enumerate(LEADS):
         draw_lead(draw, (24 + i * (lw + 8), ly0,
                          24 + i * (lw + 8) + lw, ly1), story)
 
-    # --- eight more: header 422, panels 442-662 ----------------------
-    ey0 = 422
-    draw.text((24, ey0), "EIGHT MORE", font=font(SANS_B, 11), fill=INK)
+    # --- ten more: header 446, panels 466-714 ------------------------
+    ey0 = 446
+    draw.text((24, ey0), "TEN MORE", font=font(SANS_B, 11), fill=INK)
     hline(draw, 24, W - 24, ey0 + 16, fill=INK, width=2)
-    pw = (W - 48 - 24) // 4
-    ph = 106
+    pw = (W - 48 - 4 * 8) // 5
+    ph = 120
     for i, story in enumerate(EIGHT):
-        r, c = divmod(i, 4)
-        x = 24 + c * (pw + 8)
+        r, c = divmod(i, 5)
+        x = 26 + c * (pw + 8)
         y = ey0 + 20 + r * (ph + 8)
         draw_panel(draw, (x, y, x + pw, y + ph), story)
 
-    # --- map + numbers: 668-778 --------------------------------------
-    draw_map_numbers(img, draw, (24, 668, W - 24, 778))
+    # --- map + numbers: 720-820 --------------------------------------
+    draw_map_numbers(img, draw, (24, 720, W - 24, 820))
 
-    # --- the rest: header 784, rows 804-936 --------------------------
-    draw_rest(draw, 784, 936)
+    # --- the rest: header 826, rows 846-934 --------------------------
+    draw_rest(draw, 826, 934)
 
     # --- date check + footer -----------------------------------------
     fy = 942
@@ -911,17 +956,20 @@ def self_check():
     assert len({s["n"] for s in all_stories}) == 35
     assert len({s["region"] for s in all_stories}) == 10, \
         sorted({s["region"] for s in all_stories})
-    assert len({s["field"] for s in all_stories}) == 15, \
+    assert len({s["field"] for s in all_stories}) == 16, \
         sorted({s["field"] for s in all_stories})
     assert sorted(s["n"] for s in all_stories) == list(range(1, 36))
-    # v2 structure: 3 illustrated leads + 8 illustrated panels = 11 scenes
+    # v2.3 structure: 3 illustrated leads + 10 illustrated panels
+    # = 13 scenes; REST is 22 one-liners.
+    assert len(LEADS) == 3 and len(EIGHT) == 10 and len(REST) == 22
     assert len(NUMBERS) == 6, len(NUMBERS)
     assert len(NUMBERS_TOP) == 6, len(NUMBERS_TOP)
     assert len(TIMELINE) == 6, len(TIMELINE)
-    assert sorted(PINS) == list(range(1, 12)), sorted(PINS)
+    assert sorted(PINS) == list(range(1, 14)), sorted(PINS)
     assert set(ART) == {"gulf", "store", "gaza"}, sorted(ART)
     assert set(PANEL_ART) == {"barrage", "ballot", "tanker", "chess",
-                              "court", "warehouse", "chart", "border"}, \
+                              "court", "warehouse", "chart", "border",
+                              "storm", "rocket"}, \
         sorted(PANEL_ART)
     for s in LEADS:
         assert s["art"] in ART, s["n"]
@@ -936,7 +984,7 @@ def self_check():
     im = Image.open(OUT)
     assert im.size == (1024, 1024), im.size
     h = hashlib.sha256(data).hexdigest()
-    print("OK 35 stories, 10 regions, 15 fields")
+    print("OK 35 stories, 10 regions, 16 fields")
     print("PNG %d bytes sha256 %s" % (len(data), h))
     return h
 

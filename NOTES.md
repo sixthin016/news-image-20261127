@@ -41,3 +41,16 @@
 - This revision bundles the rebuild session 022ca740 plus this
   revision session; the v2/v2.1 edits were made through tracked
   write/edit calls in this session so the lines count as authored.
+
+## v2.3 (27 Nov 2026 ~14:48–15:05 WITA, build di Simular Box "main")
+- Top 1 live BERGANTI: mang 99,1497% (38 cerita); sulthan turun ke rank 9.
+  Total hadiah $250, 1st $50 (koreksi: NOTES v2.2 menulis $100/$20 — salah).
+- v2.3: 3 lead + 10 panel = 13 scene; 35 cerita, 10 region, 16 field.
+  Panel baru: badai Thanksgiving (800.000 padam) + hadiah Musk $18bn.
+  REST 22 item satu baris (v2.2 tumpang-tindih); body migrasi diperbaiki
+  dari ONS (77.000); tanggal Macy's diperbaiki ke 26 Nov.
+- Verifikasi: render VM 2x byte-identik; render Box 2x byte-identik dengan
+  VM (sha256 d1c932ba…); main.py copy byte-identik; cek visual 3 zoom.
+  Detail lengkap: DISSECTION-v2.3.md.
+- Box: fonts-noto-core + fonts-noto-extra diinstal (apt); Pillow Box
+  diturunkan 13.0.0 -> 10.2.0 agar byte-identik dengan VM.
