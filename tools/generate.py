@@ -59,9 +59,24 @@ def font(path, size):
 
 
 def wrap(draw, text, fnt, width):
-    """Greedy word wrap; returns list of lines that fit `width` px."""
+    """Greedy word wrap; returns lines that fit `width` px.
+    A word longer than the width is hard-split mid-word instead of
+    overflowing the box."""
     lines, cur = [], ""
     for word in text.split(" "):
+        if draw.textlength(word, font=fnt) > width:
+            if cur:
+                lines.append(cur)
+                cur = ""
+            chunk = ""
+            for ch in word:
+                if draw.textlength(chunk + ch, font=fnt) <= width:
+                    chunk += ch
+                else:
+                    lines.append(chunk)
+                    chunk = ch
+            cur = chunk
+            continue
         trial = (cur + " " + word).strip()
         if draw.textlength(trial, font=fnt) <= width:
             cur = trial
@@ -123,6 +138,10 @@ def grain(img, seed=20261127, amount=9):
 
 # ---------------------------------------------------------------- stories
 # n, region, field, badge, headline, body, source
+# Slate v2 (Friday cycle): the leads are the day's three biggest
+# stories; EIGHT MORE are the next eight, each with its own drawn
+# scene and a WHY line; REST is 24 one-liners. Overnight items that
+# broke into Friday count as Friday's news (see DATECHECK).
 LEADS = [
     dict(n=1, region="Middle East", field="War", badge="REPORTED",
          art="gulf",
@@ -333,6 +352,9 @@ SOURCES = ("Sources: Reuters, AP, Bloomberg, CNN, USA TODAY, BBC, Al Jazeera, "
 
 
 # ------------------------------------------------------------------- art
+# 11 drawn scenes: 3 lead scenes (ART) + 8 panel scenes (PANEL_ART).
+# Every scene is drawn in code from offsets inside its box; nothing
+# here reads a file, a photo or the network.
 def sky_gradient(draw, box, top, bottom):
     x0, y0, x1, y1 = box
     n = y1 - y0
@@ -401,37 +423,42 @@ def art_gaza(draw, box):
 
 def art_gulf(draw, box):
     """Dusk over the Gulf: amber sky, dark sea, tanker silhouette,
-    drone dots, mine splash rings."""
+    drone dots, mine splash rings. All positions are offsets from
+    the box corner and the horizon line, so the scene scales with
+    the lead art height."""
     x0, y0, x1, y1 = box
     sky_gradient(draw, box, (214, 158, 92), (120, 84, 66))
     draw.ellipse([x1 - 52, y0 + 8, x1 - 16, y0 + 44], fill=(255, 226, 170))
     horizon = y0 + int((y1 - y0) * 0.55)
     draw.rectangle([x0, horizon, x1, y1], fill=(28, 42, 58))
-    for i in range(3):  # sun glitter on water
-        yy = horizon + 5 + i * 6
-        draw.line([(x0 + 30 + i * 8, yy), (x1 - 40 - i * 6, yy)],
+    for k in range(3):  # sun glitter on the water
+        gy = horizon + 5 + 6 * k
+        draw.line([(x0 + 30 + 8 * k, gy), (x1 - 40 - 6 * k, gy)],
                   fill=(214, 158, 92), width=2)
-    # tanker silhouette
-    draw.rectangle([x0 + 34, horizon - 16, x0 + 190, horizon + 2],
-                   fill=(10, 14, 20))
-    draw.rectangle([x0 + 60, horizon - 26, x0 + 78, horizon - 16],
-                   fill=(10, 14, 20))
-    draw.rectangle([x0 + 150, horizon - 24, x0 + 162, horizon - 16],
-                   fill=(10, 14, 20))
-    # smoke column from tanker (kept inside the box)
-    for i in range(3):
-        r = 2 + i * 2
-        cy = horizon - 10 - i * 4
+    # tanker silhouette, built from hull + funnel + bridge blocks
+    hull_blocks = [(34, -16, 190, 2), (60, -26, 78, -16),
+                   (150, -24, 162, -16)]
+    for (ax, ay, bx, by) in hull_blocks:
+        draw.rectangle([x0 + ax, horizon + ay, x0 + bx, horizon + by],
+                       fill=(10, 14, 20))
+    # smoke column rising from the funnel, kept inside the box
+    smoke_rings = [(2, -10), (4, -14), (6, -18)]
+    for (r, dy) in smoke_rings:
+        cy = horizon + dy
         draw.ellipse([x0 + 66 - r, cy - r, x0 + 66 + r, cy + r],
                      outline=(70, 60, 52), width=2)
-    # drones + mine splash rings
-    for (dx, dy) in [(x0 + 230, y0 + 26), (x0 + 262, y0 + 44),
-                     (x0 + 286, y0 + 18)]:
-        draw.ellipse([dx - 3, dy - 2, dx + 3, dy + 2], fill=(12, 12, 14))
-        draw.line([(dx - 8, dy), (dx + 8, dy)], fill=(12, 12, 14), width=1)
-    for (sx, sy, r) in [(x0 + 250, horizon + 12, 8),
-                        (x0 + 285, horizon + 18, 6)]:
-        draw.ellipse([sx - r, sy - r // 2, sx + r, sy + r // 2],
+    # three drones in the sky, each a dark dot with a rotor line
+    drones = [(230, 26), (262, 44), (286, 18)]
+    for (dx, dy) in drones:
+        draw.ellipse([x0 + dx - 3, y0 + dy - 2, x0 + dx + 3, y0 + dy + 2],
+                     fill=(12, 12, 14))
+        draw.line([(x0 + dx - 8, y0 + dy), (x0 + dx + 8, y0 + dy)],
+                  fill=(12, 12, 14), width=1)
+    # mine splash rings on the water
+    splashes = [(250, 12, 8), (285, 18, 6)]
+    for (sx, sy, r) in splashes:
+        draw.ellipse([x0 + sx - r, horizon + sy - r // 2,
+                      x0 + sx + r, horizon + sy + r // 2],
                      outline=(220, 220, 210), width=2)
 
 
@@ -686,48 +713,57 @@ def draw_panel(draw, box, story):
         wy += 11
 
 
-def draw_map_numbers(img, draw, box):
-    x0, y0, x1, y1 = box
-    mx0, my0, mx1, my1 = x0, y0, x0 + 596, y1
-    nx0 = mx1 + 12
-    draw.text((mx0, y0), "WHERE IT HAPPENED — 1 TO 11",
-              font=font(SANS_B, 11), fill=INK)
-    mapbox = (mx0, y0 + 18, mx1, y1 - 4)
-    draw.rectangle(mapbox, outline=RULE, width=1, fill=(232, 226, 210))
-    for poly in CONTINENTS:
-        pts = [lonlat_to_xy(lon, lat, mapbox) for lon, lat in poly]
-        draw.polygon(pts, fill=(196, 178, 140), outline=(90, 80, 64))
-    # graticule
-    for lon in range(-150, 181, 30):
-        gx, _ = lonlat_to_xy(lon, 0, mapbox)
-        draw.line([(gx, mapbox[1]), (gx, mapbox[3])],
+def draw_world_map(draw, area):
+    """Continents, graticule and numbered pins inside `area`."""
+    draw.rectangle(area, outline=RULE, width=1, fill=(232, 226, 210))
+    for shape in CONTINENTS:
+        corners = [lonlat_to_xy(lon, lat, area) for lon, lat in shape]
+        draw.polygon(corners, fill=(196, 178, 140), outline=(90, 80, 64))
+    for lon in range(-150, 181, 30):  # graticule, verticals
+        gx, _ = lonlat_to_xy(lon, 0, area)
+        draw.line([(gx, area[1]), (gx, area[3])],
                   fill=(210, 202, 182), width=1)
-    for lat in (-60, -30, 0, 30, 60):
-        _, gy = lonlat_to_xy(0, lat, mapbox)
-        draw.line([(mapbox[0], gy), (mapbox[2], gy)],
+    for lat in (-60, -30, 0, 30, 60):  # graticule, horizontals
+        _, gy = lonlat_to_xy(0, lat, area)
+        draw.line([(area[0], gy), (area[2], gy)],
                   fill=(210, 202, 182), width=1)
-    for n, (lon, lat) in sorted(PINS.items()):
-        px, py = lonlat_to_xy(lon, lat, mapbox)
+    for num, (lon, lat) in sorted(PINS.items()):
+        px, py = lonlat_to_xy(lon, lat, area)
         draw.ellipse([px - 6, py - 6, px + 6, py + 6], fill=RED,
                      outline=(255, 255, 255), width=1)
-        draw.text((px, py - 1), str(n), font=font(SANS_B, 8),
+        draw.text((px, py - 1), str(num), font=font(SANS_B, 8),
                   fill=(255, 255, 255), anchor="mm")
-    # BY THE NUMBERS column: 6 rows, big number + one-line caption,
-    # 15 px step so rows never overlap (v1 used 14 px and collided).
-    draw.text((nx0, y0), "BY THE NUMBERS", font=font(SANS_B, 11), fill=RED)
-    hline(draw, nx0, x1, y0 + 16, fill=RED, width=2)
-    yy = y0 + 20
+
+
+def draw_numbers_column(draw, col_x, col_right, top):
+    """BY THE NUMBERS: 6 rows, big figure + one-line caption.
+    Rows are 15 px apart so captions never collide (v1 used 14)."""
+    draw.text((col_x, top), "BY THE NUMBERS", font=font(SANS_B, 11),
+              fill=RED)
+    hline(draw, col_x, col_right, top + 16, fill=RED, width=2)
+    row_y = top + 20
     for big, small in NUMBERS:
-        draw.text((nx0, yy), big, font=font(SERIF_BLK, 14), fill=INK)
-        bw = draw.textlength(big, font=font(SERIF_BLK, 14))
-        cap = small
-        f = font(SERIF, 9.5)
-        while draw.textlength(cap, font=f) > x1 - nx0 - bw - 8 \
-                and len(cap) > 10:
-            cap = cap[:len(cap) - 4].rstrip() + "…"
-        draw.text((nx0 + bw + 8, yy + 2), cap, font=f, fill=INK)
-        yy += 15
-    return yy
+        draw.text((col_x, row_y), big, font=font(SERIF_BLK, 14), fill=INK)
+        fig_w = draw.textlength(big, font=font(SERIF_BLK, 14))
+        caption = small
+        cap_font = font(SERIF, 9.5)
+        while draw.textlength(caption, font=cap_font) \
+                > col_right - col_x - fig_w - 8 and len(caption) > 10:
+            caption = caption[:len(caption) - 4].rstrip() + "…"
+        draw.text((col_x + fig_w + 8, row_y + 2), caption, font=cap_font,
+                  fill=INK)
+        row_y += 15
+    return row_y
+
+
+def draw_map_numbers(img, draw, box):
+    """Map on the left, BY THE NUMBERS column on the right."""
+    x0, y0, x1, y1 = box
+    map_right = x0 + 596
+    draw.text((x0, y0), "WHERE IT HAPPENED — 1 TO 11",
+              font=font(SANS_B, 11), fill=INK)
+    draw_world_map(draw, (x0, y0 + 18, map_right, y1 - 4))
+    return draw_numbers_column(draw, map_right + 12, x1, y0)
 
 
 def draw_rest(draw, y0, y1):
@@ -737,25 +773,26 @@ def draw_rest(draw, y0, y1):
     draw.text((24, y0), "THE REST — 24 MORE STORIES",
               font=font(SANS_B, 11), fill=INK)
     hline(draw, 24, W - 24, y0 + 16, fill=INK, width=2)
-    col_w = (W - 48 - 32) // 3
-    per_col = 8
-    for ci in range(3):
-        cx = 24 + ci * (col_w + 16)
-        yy = y0 + 20
-        for item in REST[ci * per_col:(ci + 1) * per_col]:
-            n, region, field, bdg, head, src = item
-            draw.text((cx, yy), "%d." % n, font=font(SERIF_B, 11),
+    col_width = (W - 48 - 32) // 3
+    rows_per_col = 8
+    for col in range(3):
+        col_x = 24 + col * (col_width + 16)
+        row_y = y0 + 20
+        for item in REST[col * rows_per_col:(col + 1) * rows_per_col]:
+            num, region, field, _badge, headline, src = item
+            draw.text((col_x, row_y), "%d." % num, font=font(SERIF_B, 11),
                       fill=RED)
-            tx = cx + 26
-            f = font(SERIF, 10.5)
-            line = head
-            while draw.textlength(line, font=f) > col_w - 26 and len(line) > 10:
-                line = line[:len(line) - 4].rstrip() + "…"
-            draw.text((tx, yy), line, font=f, fill=INK)
-            yy += 10
-            draw.text((tx, yy), "%s · %s · %s" % (region, field, src),
+            text_x = col_x + 26
+            head_font = font(SERIF, 10.5)
+            shown = headline
+            while draw.textlength(shown, font=head_font) > col_width - 26 \
+                    and len(shown) > 10:
+                shown = shown[:len(shown) - 4].rstrip() + "…"
+            draw.text((text_x, row_y), shown, font=head_font, fill=INK)
+            row_y += 10
+            draw.text((text_x, row_y), "%s · %s · %s" % (region, field, src),
                       font=font(SANS, 8), fill=GREY)
-            yy += 6.5
+            row_y += 6.5
     return y1
 
 
